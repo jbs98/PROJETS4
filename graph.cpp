@@ -1,14 +1,15 @@
 #include "graph.h"
 #include <sstream>
+#include <fstream>
 
 namespace patch
 {
-    template<typename T> std::string to_string(const T& n)
-    {
-        std::ostringstream stm;
-        stm<<n;
-        return stm.str();
-    }
+template<typename T> std::string to_string(const T& n)
+{
+    std::ostringstream stm;
+    stm<<n;
+    return stm.str();
+}
 }
 /***************************************************
                     VERTEX
@@ -24,7 +25,7 @@ VertexInterface::VertexInterface(int idx, int x, int y, std::string pic_name, in
 
     // Le slider de réglage de valeur
     m_top_box.add_child( m_slider_value );
-    m_slider_value.set_range(0.0 , 100.0); // Valeurs arbitraires, à adapter...
+    m_slider_value.set_range(0.0, 100.0);  // Valeurs arbitraires, à adapter...
     m_slider_value.set_dim(20,80);
     m_slider_value.set_gravity_xy(grman::GravityX::Left, grman::GravityY::Up);
 
@@ -102,7 +103,7 @@ EdgeInterface::EdgeInterface(Vertex& from, Vertex& to)
 
     // Le slider de réglage de valeur
     m_box_edge.add_child( m_slider_weight );
-    m_slider_weight.set_range(0.0 , 100.0); // Valeurs arbitraires, à adapter...
+    m_slider_weight.set_range(0.0, 100.0);  // Valeurs arbitraires, à adapter...
     m_slider_weight.set_dim(16,40);
     m_slider_weight.set_gravity_y(grman::GravityY::Up);
 
@@ -161,11 +162,117 @@ GraphInterface::GraphInterface(int x, int y, int w, int h)
 }
 
 
-void Graph::test()
+void Graph::Recovry()
 {
-    m_interface = std::make_shared<GraphInterface> (50, 0, 750, 600);
-    add_interfaced_vertex(0, 30.0, 280, 400, "Vegetaux.bmp");
+    m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
+
+    std::ifstream fichier ("test.txt", std::ios::in);
+    int nbaretes, idx, order, x, y, vert1, vert2;
+    double value;
+    std::string name;
+
+    fichier >> order;
+    std::cout << order << std::endl;
+    fichier >> nbaretes;
+    std::cout << nbaretes << std::endl;
+
+    for(int i = 0; i < order; i++)
+    {
+        fichier >> idx;
+        fichier >> value;
+        std::cout << value << std::endl;
+        fichier >> x;
+        std::cout << x << std::endl;
+        fichier >> y;
+        std::cout << y << std::endl;
+        fichier >> name;
+        std::cout << name << std::endl;
+        add_interfaced_vertex(idx, value, x, y, name);
+
+
+    }
+
+
+    for(int i = 0; i < nbaretes; i++)
+    {
+        fichier >> idx;
+        fichier >> vert1;
+        fichier >> vert2;
+        fichier >> value;
+
+        add_interfaced_edge(idx, vert1, vert2, value);
+    }
+
+    fichier.close();
 }
+
+void Graph::save()
+{
+    m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
+    std::ofstream fichier ("test.txt", std::ios::trunc);
+    int nbaretes, idx, order, x, y, vert1, vert2;
+    double value;
+    std::string name;
+
+    fichier << m_vertices.size();
+    fichier << std::endl;
+    fichier << m_edges.size();
+    fichier << std::endl;
+
+
+    for(int i = 0; i < m_vertices.size(); i++)
+    {
+        fichier << i << " " ;
+        fichier << m_vertices[i].m_value << " " ;
+        fichier << m_vertices[i].m_interface -> m_top_box.get_posx() << " ";
+        fichier << m_vertices[i].m_interface -> m_top_box.get_posy() << " ";
+        fichier << m_vertices[i].m_interface -> m_img.getpic_name();
+        fichier << std::endl;
+    }
+
+
+    for(int i = 0; i < m_edges.size(); i ++)
+    {
+        fichier << i << " ";
+        fichier << m_edges[i].m_from << " ";
+        std::cout << m_edges[i].m_from << std::endl;
+        fichier << m_edges[i].m_to << " " ;
+        std::cout << m_edges[i].m_to << std::endl;
+        fichier << m_edges[i].m_weight;
+        fichier << std::endl;
+    }
+
+    fichier.close();
+
+}
+
+/*void Graph::sauvegarde(std::map<int, Vertex> m_vertices)
+{
+    std::string buff;
+    std::ofstream fichier("txt1.txt",std::ios::out|std::ios::trunc);
+
+    fichier<<m_vertices.size();
+    fichier<< " ";
+
+
+    for(unsigned int i=0;i<m_vertices.size();i++)
+    {
+        fichier<<i<<" "<<m_vertices[i].m_value<<" "<< m_vertices[i].m_interface->m_top_box.get_posx()<<" "<<m_vertices[i].m_interface->m_top_box.get_posy()<< " "<<m_vertices[i].m_interface->m_img.m_pic_name;
+        fichier<<std::endl;
+    }
+    fichier.close();
+
+    std::ofstream fichier1("txt2.txt",std::ios::out|std::ios::trunc);
+    fichier1<<m_edges.size();
+    fichier1<<std::endl;
+
+    for(unsigned int i=0;i<m_edges.size();i++)
+    {
+        fichier1<< i << " "<< m_edges[i].m_from<< " " << m_edges[i].m_to<< " " << m_edges[i].m_weight;
+        fichier1<< std::endl;
+    }
+    fichier1.close();
+}*/
 /// Méthode spéciale qui construit un graphe arbitraire (démo)
 /// Cette méthode est à enlever et remplacer par un système
 /// de chargement de fichiers par exemple.
@@ -221,6 +328,7 @@ void Graph::update()
 
     for (auto &elt : m_edges)
         elt.second.post_update();
+
 
 }
 

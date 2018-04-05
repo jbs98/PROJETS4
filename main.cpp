@@ -15,7 +15,22 @@ int main()
     /// Un exemple de graphe
     Graph g;
 
-    g.test();
+    g.Recovry();
+
+    /// Vous gardez la main sur la "boucle de jeu"
+    /// ( contrairement à des frameworks plus avancés )
+    while ( !key[KEY_ESC] )
+    {
+        /// Il faut appeler les méthodes d'update des objets qui comportent des widgets
+        g.update();
+
+        /// Mise à jour générale (clavier/souris/buffer etc...)
+        grman::mettre_a_jour();
+
+
+    }
+
+    //g.save();
 
     grman::fermer_allegro();
 
