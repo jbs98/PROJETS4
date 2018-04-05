@@ -114,6 +114,10 @@ private :
     // Une boite pour le label précédent
     grman::WidgetText m_box_label_idx;
 
+    // Bouton de suppréssion
+    grman::WidgetButton m_button_delete;
+    grman::WidgetText m_text_delete;
+
 public :
 
     // Le constructeur met en place les éléments de l'interface

@@ -50,6 +50,19 @@ VertexInterface::VertexInterface(int idx, int x, int y, std::string pic_name, in
 
     m_box_label_idx.add_child( m_label_idx );
     m_label_idx.set_message( patch::to_string(idx) );
+
+    //Bouton de suppression
+    m_top_box.add_child(m_button_delete);
+    m_button_delete.set_gravity_xy(grman::GravityX::Right, grman::GravityY::Up);
+    m_button_delete.set_dim(50,20);
+    m_button_delete.set_bg_color(ROUGE);
+
+    //Ajout texte boutton supression
+    m_button_delete.add_child(m_text_delete);
+    m_text_delete.set_message( "DELETE");
+    m_text_delete.set_gravity_y(grman::GravityY::Center);
+
+
 }
 
 
@@ -166,7 +179,7 @@ void Graph::Recovry()
 {
     m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
 
-    std::ifstream fichier ("savane.txt", std::ios::in);
+    std::ifstream fichier ("test.txt", std::ios::in);
     int nbaretes, idx, order, x, y, vert1, vert2;
     double value;
     std::string name;
@@ -209,7 +222,7 @@ void Graph::Recovry()
 void Graph::save()
 {
     //m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
-    std::ofstream fichier ("savane.txt", std::ios::out|std::ios::trunc);
+    std::ofstream fichier ("test.txt", std::ios::out|std::ios::trunc);
 
     fichier << m_vertices.size();
     fichier << std::endl;
