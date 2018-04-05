@@ -24,13 +24,15 @@ int main()
         /// Il faut appeler les méthodes d'update des objets qui comportent des widgets
         g.update();
 
+
+
         /// Mise à jour générale (clavier/souris/buffer etc...)
         grman::mettre_a_jour();
 
 
     }
 
-    //g.save();
+    g.save();
 
     grman::fermer_allegro();
 

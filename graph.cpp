@@ -208,11 +208,8 @@ void Graph::Recovry()
 
 void Graph::save()
 {
-    m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
-    std::ofstream fichier ("test.txt", std::ios::trunc);
-    int nbaretes, idx, order, x, y, vert1, vert2;
-    double value;
-    std::string name;
+    //m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
+    std::ofstream fichier ("test.txt", std::ios::out|std::ios::trunc);
 
     fichier << m_vertices.size();
     fichier << std::endl;
@@ -231,15 +228,12 @@ void Graph::save()
     }
 
 
-    for(int i = 0; i < m_edges.size(); i ++)
+
+
+    for(unsigned int i=0;i<m_edges.size();i++)
     {
-        fichier << i << " ";
-        fichier << m_edges[i].m_from << " ";
-        std::cout << m_edges[i].m_from << std::endl;
-        fichier << m_edges[i].m_to << " " ;
-        std::cout << m_edges[i].m_to << std::endl;
-        fichier << m_edges[i].m_weight;
-        fichier << std::endl;
+        fichier<< i << " "<< m_edges[i].m_from<< " " << m_edges[i].m_to<< " " << m_edges[i].m_weight;
+        fichier<< std::endl;
     }
 
     fichier.close();
@@ -329,7 +323,6 @@ void Graph::update()
     for (auto &elt : m_edges)
         elt.second.post_update();
 
-
 }
 
 /// Aide à l'ajout de sommets interfacés
@@ -366,5 +359,9 @@ void Graph::add_interfaced_edge(int idx, int id_vert1, int id_vert2, double weig
     EdgeInterface *ei = new EdgeInterface(m_vertices[id_vert1], m_vertices[id_vert2]);
     m_interface->m_main_box.add_child(ei->m_top_edge);
     m_edges[idx] = Edge(weight, ei);
+    m_edges[idx].m_from=id_vert1;
+    m_edges[idx].m_to=id_vert2;
+    m_vertices[id_vert1].m_out.push_back(idx);
+    m_vertices[id_vert2].m_out.push_back(idx);
 }
 

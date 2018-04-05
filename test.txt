@@ -1,8 +1,8 @@
 3
 3
-0 50.2 656 360 Vegetaux.bmp
-1 50.2 626 48 Gnou.bmp
-2 50.2 300 400 Leopard.bmp
+0 50.2 382 373 Vegetaux.bmp
+1 50.2 223 76 Gnou.bmp
+2 50 611 81 Leopard.bmp
 0 0 1 20.3
 1 1 2 20.3
-2 0 2 20.3
+2 2 0 20.3
