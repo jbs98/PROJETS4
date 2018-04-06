@@ -40,7 +40,7 @@ int main()
 
     }
 
-    g.save();
+    //g.save();
 
     grman::fermer_allegro();
 
