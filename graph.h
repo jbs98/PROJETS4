@@ -91,6 +91,8 @@ class VertexInterface
     friend class Graph;
 
 private :
+    int m_idx;
+
 
     /// Les widgets de l'interface. N'oubliez pas qu'il ne suffit pas de déclarer
     /// ici un widget pour qu'il apparaisse, il faut aussi le mettre en place et
@@ -123,6 +125,11 @@ public :
     // Le constructeur met en place les éléments de l'interface
     // voir l'implémentation dans le .cpp
     VertexInterface(int idx, int x, int y, std::string pic_name="", int pic_idx=0);
+    int getidx()
+    {
+        return m_idx;
+    }
+
 };
 
 
@@ -136,6 +143,8 @@ class Vertex
     friend class EdgeInterface;
 
 private :
+
+
     /// liste des indices des arcs arrivant au sommet : accès aux prédécesseurs
     std::vector<int> m_in;
 
@@ -164,7 +173,10 @@ public:
     /// le pre_update et post_update de Vertex (pas directement la boucle de jeu)
     /// Voir l'implémentation Graph::update dans le .cpp
     void pre_update();
-    void post_update();
+    void post_update(int *x);
+
+
+
 };
 
 
@@ -283,6 +295,7 @@ class Graph
 {
 private :
 
+
     /// La "liste" des arêtes
     std::map<int, Edge> m_edges;
 
@@ -310,6 +323,16 @@ public:
     //void make_example();
     void Recovry();
     void save();
+
+    ///Suppression
+    void test_remove_edge(int eidx);
+    void test_remove_vertex(int eidx);
+
+
+
+    void make_example();
+    void saveV(int idx);
+
 
 
     /// La méthode update à appeler dans la boucle de jeu pour les graphes avec interface

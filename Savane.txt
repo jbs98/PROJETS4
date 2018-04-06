@@ -1,17 +1,17 @@
 12
 20
-0 50.2 470 480 Vegetaux.bmp
-1 50.2 310 300 Gnou.bmp
-2 50.2 542 -1 Leopard.bmp
-3 50.2 773 298 Babouin.bmp
-4 50.2 457 292 Buffle.bmp
-5 50.2 737 476 Elephant.bmp
-6 50.2 125 300 Phacochere.bmp
-7 50.2 622 291 Gazelle.bmp
-8 50.2 324 -1 Guepard.bmp
-9 50.2 134 439 Hippopotame.bmp
-10 50.2 729 52 Hyene.bmp
-11 50.2 148 21 Lion.bmp
+0 100 470 480 Vegetaux.bmp
+1 20 310 300 Gnou.bmp
+2 2 542 -1 Leopard.bmp
+3 20 773 298 Babouin.bmp
+4 10 457 292 Buffle.bmp
+5 5 737 476 Elephant.bmp
+6 7 125 300 Phacochere.bmp
+7 25 622 291 Gazelle.bmp
+8 4 324 -1 Guepard.bmp
+9 10 134 439 Hippopotame.bmp
+10 15 729 52 Hyene.bmp
+11 8 148 21 Lion.bmp
 0 0 9 30.3
 1 0 4 30.3
 2 0 1 30.3

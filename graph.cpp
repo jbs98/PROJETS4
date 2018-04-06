@@ -18,6 +18,7 @@ template<typename T> std::string to_string(const T& n)
 /// Le constructeur met en place les éléments de l'interface
 VertexInterface::VertexInterface(int idx, int x, int y, std::string pic_name, int pic_idx)
 {
+    m_idx = idx;
     // La boite englobante
     m_top_box.set_pos(x, y);
     m_top_box.set_dim(130, 100);
@@ -33,6 +34,7 @@ VertexInterface::VertexInterface(int idx, int x, int y, std::string pic_name, in
     m_top_box.add_child( m_label_value );
     m_label_value.set_gravity_xy(grman::GravityX::Left, grman::GravityY::Down);
 
+
     // Une illustration...
     if (pic_name!="")
     {
@@ -40,10 +42,12 @@ VertexInterface::VertexInterface(int idx, int x, int y, std::string pic_name, in
         m_img.set_pic_name(pic_name);
         m_img.set_pic_idx(pic_idx);
         m_img.set_gravity_x(grman::GravityX::Right);
+
+
     }
 
     // Label de visualisation d'index du sommet dans une boite
-    m_top_box.add_child( m_box_label_idx );
+    m_img.add_child( m_box_label_idx );
     m_box_label_idx.set_gravity_xy(grman::GravityX::Right, grman::GravityY::Down);
     m_box_label_idx.set_dim(20,12);
     m_box_label_idx.set_bg_color(BLANC);
@@ -61,8 +65,6 @@ VertexInterface::VertexInterface(int idx, int x, int y, std::string pic_name, in
     m_button_delete.add_child(m_text_delete);
     m_text_delete.set_message( "DELETE");
     m_text_delete.set_gravity_y(grman::GravityY::Center);
-
-
 }
 
 
@@ -76,19 +78,27 @@ void Vertex::pre_update()
     m_interface->m_slider_value.set_value(m_value);
 
     /// Copier la valeur locale de la donnée m_value vers le label sous le slider
-    m_interface->m_label_value.set_message(patch::to_string( (int)m_value) );
+    m_interface->m_label_value.set_message( patch::to_string( (int)m_value) );
 }
 
 
 /// Gestion du Vertex après l'appel à l'interface
-void Vertex::post_update()
+void Vertex::post_update(int *x)
 {
     if (!m_interface)
         return;
 
     /// Reprendre la valeur du slider dans la donnée m_value locale
     m_value = m_interface->m_slider_value.get_value();
+
+    if (m_interface->m_button_delete.clicked())
+    {
+        *x = m_interface->getidx();
+    }
+
 }
+
+
 
 
 
@@ -179,7 +189,7 @@ void Graph::Recovry()
 {
     m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
 
-    std::ifstream fichier ("test.txt", std::ios::in);
+    std::ifstream fichier ("savane.txt", std::ios::in);
     int nbaretes, idx, order, x, y, vert1, vert2;
     double value;
     std::string name;
@@ -205,24 +215,29 @@ void Graph::Recovry()
 
     }
 
-
     for(int i = 0; i < nbaretes; i++)
     {
         fichier >> idx;
+        std::cout << idx << std::endl;
         fichier >> vert1;
+        std::cout << vert1 << std::endl;
         fichier >> vert2;
+        std::cout << vert2 << std::endl;
         fichier >> value;
+        std::cout << value << std::endl;
 
         add_interfaced_edge(idx, vert1, vert2, value);
     }
+
 
     fichier.close();
 }
 
 void Graph::save()
 {
+    int a = 0;
     //m_interface = std::make_shared<GraphInterface>(50, 0, 750, 600);
-    std::ofstream fichier ("test.txt", std::ios::out|std::ios::trunc);
+    std::ofstream fichier ("savane.txt", std::ios::out|std::ios::trunc);
 
     fichier << m_vertices.size();
     fichier << std::endl;
@@ -230,7 +245,7 @@ void Graph::save()
     fichier << std::endl;
 
 
-    for(int i = 0; i < m_vertices.size(); i++)
+    for( unsigned int i = 0; i < m_vertices.size(); i++)
     {
         fichier << i << " " ;
         fichier << m_vertices[i].m_value << " " ;
@@ -243,10 +258,22 @@ void Graph::save()
 
 
 
-    for(unsigned int i=0;i<m_edges.size();i++)
+    for(unsigned int i=0; i<m_edges.size(); i++)
     {
-        fichier<< i << " "<< m_edges[i].m_from<< " " << m_edges[i].m_to<< " " << m_edges[i].m_weight;
-        fichier<< std::endl;
+        if(m_edges[i].m_from == m_edges[i].m_to)
+        {
+            if(i != 0)
+                a ++ ;
+        }
+        else
+        {
+        fichier << i - a << " ";
+        fichier << m_edges[i].m_from<< " ";
+        fichier << m_edges[i].m_to<< " ";
+        fichier << m_edges[i].m_weight;
+        fichier << std::endl;
+        }
+
     }
 
     fichier.close();
@@ -254,9 +281,12 @@ void Graph::save()
 }
 
 
+
 /// La méthode update à appeler dans la boucle de jeu pour les graphes avec interface
 void Graph::update()
 {
+    int *x = new int;
+    *x = -1;
     if (!m_interface)
         return;
 
@@ -269,11 +299,19 @@ void Graph::update()
     m_interface->m_top_box.update();
 
     for (auto &elt : m_vertices)
-        elt.second.post_update();
+        elt.second.post_update(x);
 
     for (auto &elt : m_edges)
         elt.second.post_update();
 
+
+    if (*x > -1 && *x < m_vertices.size())
+        test_remove_vertex(*x);
+    delete x;
+
+
+
+    //save();
 
 }
 
@@ -311,9 +349,149 @@ void Graph::add_interfaced_edge(int idx, int id_vert1, int id_vert2, double weig
     EdgeInterface *ei = new EdgeInterface(m_vertices[id_vert1], m_vertices[id_vert2]);
     m_interface->m_main_box.add_child(ei->m_top_edge);
     m_edges[idx] = Edge(weight, ei);
-    m_edges[idx].m_from=id_vert1;
-    m_edges[idx].m_to=id_vert2;
+
+    /// OOOPS ! Prendre en compte l'arc ajouté dans la topologie du graphe !
+    m_edges[idx].m_from = id_vert1;
+    m_edges[idx].m_to = id_vert2;
+
     m_vertices[id_vert1].m_out.push_back(idx);
-    m_vertices[id_vert2].m_out.push_back(idx);
+    m_vertices[id_vert2].m_in.push_back(idx);
 }
 
+
+/// eidx index of edge to remove
+void Graph::test_remove_edge(int eidx)
+{
+    /// référence vers le Edge à enlever
+    /// on parcourt la map jusqu'à l'endroit de l'indice rentré en paramètre de la fonction
+    Edge &remed=m_edges.at(eidx);
+
+    std::cout << "Removing edge " << eidx << " " << remed.m_from << "->" << remed.m_to << " de poid " << remed.m_weight << std::endl;
+
+    /// Tester la cohérence : nombre d'arc entrants et sortants des sommets 1 et 2
+    std::cout << "AVANT : size entrant de " << remed.m_from << " : " << m_vertices[remed.m_from].m_in.size() << " : size sortant de " << remed.m_from << " : " << m_vertices[remed.m_from].m_out.size() << std::endl;
+    std::cout << "AVANT : size entrant de " << remed.m_to << " : " << m_vertices[remed.m_to].m_in.size() << " : size sortant de " << remed.m_to << " : " << m_vertices[remed.m_to].m_out.size() << std::endl;
+    std::cout << "AVANT : taille des edges a la fin : " << m_edges.size() << std::endl;
+
+    /// test : on a bien des éléments interfacés
+    if (m_interface && remed.m_interface)
+    {
+        /// Ne pas oublier qu'on a fait ça à l'ajout de l'arc :
+        // EdgeInterface *ei = new EdgeInterface(m_vertices[id_vert1], m_vertices[id_vert2]); */
+        // m_interface->m_main_box.add_child(ei->m_top_edge); */
+        // m_edges[idx] = Edge(weight, ei); */
+        /// Le new EdgeInterface ne nécessite pas de delete car on a un shared_ptr
+        /// Le Edge ne nécessite pas non plus de delete car on n'a pas fait de new (sémantique par valeur)
+        /// mais il faut bien enlever le conteneur d'interface m_top_edge de l'arc de la main_box du graphe
+        m_interface->m_main_box.remove_child( remed.m_interface->m_top_edge );
+    }
+
+    /// Il reste encore à virer l'arc supprimé de la liste des entrants et sortants des 2 sommets to et from !
+    /// References sur les listes de edges des sommets from et to
+    std::vector<int> &vefrom = m_vertices[remed.m_from].m_out;
+    std::vector<int> &veto = m_vertices[remed.m_to].m_in;
+    vefrom.erase( std::remove( vefrom.begin(), vefrom.end(), eidx ), vefrom.end() );
+    veto.erase( std::remove( veto.begin(), veto.end(), eidx ), veto.end() );
+
+    /// Le Edge ne nécessite pas non plus de delete car on n'a pas fait de new (sémantique par valeur)
+    /// Il suffit donc de supprimer l'entrée de la map pour supprimer à la fois l'Edge et le EdgeInterface
+    /// mais malheureusement ceci n'enlevait pas automatiquement l'interface top_edge en tant que child de main_box !
+    m_edges.erase( eidx );
+
+    /// Tester la cohérence : nombre d'arc entrants et sortants des sommets 1 et 2
+    std::cout << "APRES : size entrant de " << remed.m_from << " : " << m_vertices[remed.m_from].m_in.size() << " : size sortant de " << remed.m_from << " : " << m_vertices[remed.m_from].m_out.size() << std::endl;
+    std::cout << "APRES : size entrant de " << remed.m_to << " : " << m_vertices[remed.m_to].m_in.size() << " : size sortant de " << remed.m_to << " : " << m_vertices[remed.m_to].m_out.size() << std::endl;
+    std::cout << "APRES : taille des edges a la fin : " << m_edges.size() << std::endl;
+
+}
+
+void Graph::saveV(int idx)
+{
+
+    std::ofstream fichier ("test.txt", std::ios::out|std::ios::trunc);
+
+    fichier << m_vertices.size();
+    fichier << std::endl;
+    fichier << m_edges.size();
+    fichier << std::endl;
+
+    std::cout << " LE SOMMET SUPPRIME = " << idx << std::endl;
+
+
+    for( unsigned int i = 0; i < idx ; i++)
+    {
+        fichier << i << " " ;
+        fichier << m_vertices[i].m_value << " " ;
+        fichier << m_vertices[i].m_interface -> m_top_box.get_posx() << " ";
+        fichier << m_vertices[i].m_interface -> m_top_box.get_posy() << " ";
+        fichier << m_vertices[i].m_interface -> m_img.getpic_name();
+        fichier << std::endl;
+    }
+
+    for( unsigned int i = 0; i > idx && i < m_vertices.size() ; i++)
+    {
+        fichier << i << " " ;
+        fichier << m_vertices[i].m_value << " " ;
+        fichier << m_vertices[i].m_interface -> m_top_box.get_posx() << " ";
+        fichier << m_vertices[i].m_interface -> m_top_box.get_posy() << " ";
+        fichier << m_vertices[i].m_interface -> m_img.getpic_name();
+        fichier << std::endl;
+    }
+
+
+
+
+    for(unsigned int i=0; i<m_edges.size(); i++)
+    {
+        fichier<< i << " "<< m_edges[i].m_from<< " " << m_edges[i].m_to<< " " << m_edges[i].m_weight;
+        fichier<< std::endl;
+    }
+
+
+    fichier.close();
+
+
+}
+
+void Graph::test_remove_vertex(int vidx)
+{
+    Vertex &remver = m_vertices.at(vidx);
+
+    int i = remver.m_in.size()-1;
+    while (!remver.m_in.empty())
+    {
+        test_remove_edge(remver.m_in[i]);
+        i--;
+    }
+
+    int j = remver.m_out.size()-1;
+    while (!remver.m_out.empty())
+    {
+        test_remove_edge(remver.m_out[j]);
+        j--;
+    }
+
+    if (m_interface && remver.m_interface)
+        m_interface->m_main_box.remove_child (remver.m_interface->m_top_box);
+
+            m_vertices.at(vidx).m_interface->m_top_box.set_pos(0, 0);
+
+//
+//    saveV(vidx);
+//    Recovry();
+//    std::map<int, Vertex> &ver = m_vertices;
+//    ver.erase( std::remove( ver.begin(), ver.end(), vidx ), ver.end() );
+//
+//    m_vertices.erase(vidx);
+
+//
+//3
+//3
+//0 50.2 689 258 Vegetaux.bmp
+//1 50.2 529 42 Gnou.bmp
+//2 34.5 653 345 Leopard.bmp
+//0 0 1 32.4
+//1 1 2 43.4
+//2 2 0 43.6
+
+}
